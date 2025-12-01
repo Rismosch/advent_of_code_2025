@@ -21,9 +21,9 @@ Then, make a folder that holds all your puzzle inputs:
 
 Copy your puzzle inputs as files into this folder. 1 file for the input of 1 day.
 
-A puzzle input file must have the format as below. Note how the file has no extension:
+A puzzle input file must have the format as below. Notice how the file has no extension:
 
-    puzzle_input/day_<day number>
+    day_<day number>
 
 # Usage
 
