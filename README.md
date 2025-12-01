@@ -29,7 +29,7 @@ For example, the file below holds the puzzle input for day 1:
 
     ./puzzle_input/day_1
 
-# Usage
+## Usage
 
 To run a solution, pass the day number as the first argument:
 
