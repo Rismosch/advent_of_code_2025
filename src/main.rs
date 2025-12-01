@@ -11,7 +11,7 @@ use ris_log::constructed_log_message::ConstructedLogFormatArgs;
 
 const PUZZLE_INPUT_PATH: &str = "puzzle_input";
 
-const LOG_LEVEL: LogLevel = LogLevel::Debug;
+const LOG_LEVEL: LogLevel = LogLevel::Trace;
 
 struct ConsoleAppender;
 

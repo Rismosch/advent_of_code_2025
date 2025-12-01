@@ -1,18 +1,7 @@
 use ris_error::prelude::*;
 
+const PUZZLE_INPUT_KEY: &str = "day_1";
 const POSITIONS: usize = 100;
-
-const TEST_INPUT: &str = "L68
-L30
-R48
-L5
-R60
-L55
-L1
-L99
-R14
-L82
-";
 
 #[derive(Debug, Clone, Copy)]
 enum Direction {
@@ -79,9 +68,9 @@ impl TryFrom<&str> for Rotation {
 
 pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     ris_log::info!("read input...");
-    let input = crate::read_puzzle_input("day_1")?;
-    //let input = TEST_INPUT;
+    let input = crate::read_puzzle_input(PUZZLE_INPUT_KEY)?;
 
+    ris_log::info!("parse input...");
     let mut rotations = Vec::new();
     for line in input.lines() {
         if line.is_empty() {
@@ -92,6 +81,18 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
         rotations.push(rotation);
     }
 
+    ris_log::info!("run part 1...");
+    let result = part_1(&rotations)?;
+    answer.add(format!("1: {}", result));
+
+    ris_log::info!("run part 2...");
+    let result = part_2(&rotations)?;
+    answer.add(format!("2: {}", result));
+
+    Ok(())
+}
+
+fn part_1(input: &[Rotation]) -> RisResult<usize> {
     ris_log::info!("apply rotations...");
     let mut dial = Dial::<POSITIONS> {
         position: 50,
@@ -99,17 +100,38 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
 
     let mut counter = 0;
 
-    ris_log::trace!("position: {}", dial.position);
-    for rotation in rotations {
-        dial.add(rotation)?;
-        ris_log::trace!("position: {}", dial.position);
+    for rotation in input.iter() {
+        dial.add(*rotation)?;
 
         if dial.position == 0 {
             counter += 1;
         }
     }
 
-    answer.add(counter.to_string());
+    Ok(counter)
+}
 
-    Ok(())
+fn part_2(input: &[Rotation]) -> RisResult<usize> {
+    ris_log::info!("apply rotations...");
+    let mut dial = Dial::<POSITIONS> {
+        position: 50,
+    };
+    
+    ris_log::trace!("{:?}", dial);
+    let mut counter = 0;
+    for rotation in input.iter() {
+        let Rotation { direction, mut clicks } = *rotation;
+
+        while clicks != 0 {
+            clicks -= 1;
+
+            dial.add(Rotation {direction,clicks: 1})?;
+
+            if dial.position == 0 {
+                counter += 1;
+            }
+        }
+    }
+
+    Ok(counter)
 }
