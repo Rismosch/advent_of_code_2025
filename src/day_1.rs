@@ -57,6 +57,9 @@ fn part_2(input: &[Rotation]) -> RisResult<usize> {
             mut clicks,
         } = *rotation;
 
+        // surely there's a better way than this, but
+        // the input isn't that big, and it takes about
+        // a millisecond on my machine, so what gives?
         while clicks != 0 {
             clicks -= 1;
 

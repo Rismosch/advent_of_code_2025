@@ -46,6 +46,8 @@ impl Answer {
 }
 
 fn main() -> RisResult<()> {
+    let start = std::time::Instant::now();
+
     // init logging
     let console_appender = Box::new(ConsoleAppender);
     let appenders: Vec<Box<dyn IAppender + Send>> = vec![console_appender];
@@ -78,6 +80,12 @@ fn main() -> RisResult<()> {
     for message in answer.0 {
         println!("{}", message);
     }
+
+    // print time
+    let end = std::time::Instant::now();
+    let duration = end - start;
+    eprintln!();
+    eprintln!("done! time elapsed: {:?}", duration);
 
     Ok(())
 }
