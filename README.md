@@ -8,16 +8,28 @@ https://adventofcode.com/
 
 To compile and run the code in this repo, you will need rustc and cargo. I am using version 1.90.0 [download link](https://rust-lang.org/tools/install/)
 
-## Usage
+## Setup
 
 Clone this repo:
 
     git clone https://github.com/Rismosch/advent_of_code_2025.git
     cd advent_of_code_2025
 
-And then run it:
+Then, make a folder that holds all your puzzle inputs:
 
-    cargo run -r -- <day number>
+    mkdir puzzle_input
+
+Copy your puzzle inputs as files into this folder. 1 file for the input of 1 day.
+
+A puzzle input file must have the format as below. Note how the file has no extension:
+
+    puzzle_input/day_<day number>
+
+# Usage
+
+To run a solution, pass the day number as the first argument:
+
+    cargo run -r <day number>
 
 For example this will run the solution for day 1:
 
