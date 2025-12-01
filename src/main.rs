@@ -4,10 +4,10 @@ use std::io::Read;
 use std::path::PathBuf;
 
 use ris_error::prelude::*;
+use ris_log::constructed_log_message::ConstructedLogFormatArgs;
 use ris_log::log::IAppender;
 use ris_log::log_level::LogLevel;
 use ris_log::log_message::LogMessage;
-use ris_log::constructed_log_message::ConstructedLogFormatArgs;
 
 const PUZZLE_INPUT_PATH: &str = "puzzle_input";
 
@@ -17,7 +17,7 @@ struct ConsoleAppender;
 
 impl IAppender for ConsoleAppender {
     fn print(&mut self, message: &LogMessage) {
-        let args = ConstructedLogFormatArgs { 
+        let args = ConstructedLogFormatArgs {
             ansi_support: true,
             show_timestamp: false,
             show_priority: true,

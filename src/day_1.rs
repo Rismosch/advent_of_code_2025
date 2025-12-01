@@ -3,69 +3,6 @@ use ris_error::prelude::*;
 const PUZZLE_INPUT_KEY: &str = "day_1";
 const POSITIONS: usize = 100;
 
-#[derive(Debug, Clone, Copy)]
-enum Direction {
-    Left,
-    Right,
-}
-
-#[derive(Debug, Clone, Copy)]
-struct Rotation {
-    direction: Direction,
-    clicks: usize,
-}
-
-#[derive(Debug, Clone, Copy)]
-struct Dial<const CLICKS: usize> {
-    position: usize,
-}
-
-impl<const T: usize> Dial<T> {
-    fn add(&mut self, rotation: Rotation) -> RisResult<()> {
-        let clicks_to_apply = rotation.clicks % T;
-
-        match rotation.direction {
-            Direction::Left => {
-                if clicks_to_apply > self.position {
-                    self.position = T - clicks_to_apply + self.position;
-                } else {
-                    self.position -= clicks_to_apply;
-                }
-            },
-            Direction::Right => {
-                self.position = self.position
-                    .checked_add(clicks_to_apply)
-                    .into_ris_error()?;
-
-                if self.position >= T {
-                    self.position -= T;
-                }
-            },
-        }
-
-        Ok(())
-    }
-}
-
-impl TryFrom<&str> for Rotation {
-    type Error = RisError;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        let direction_str = &value[0..1];
-        let clicks_str = &value[1..];
-
-        let direction = match direction_str.to_lowercase().as_str() {
-            "l" => Direction::Left,
-            "r" => Direction::Right,
-            _ => return ris_error::new_result!("invalid direction: {}", direction_str),
-        };
-
-        let clicks = clicks_str.parse()?;
-
-        Ok(Rotation {direction, clicks})
-    }
-}
-
 pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     ris_log::info!("read input...");
     let input = crate::read_puzzle_input(PUZZLE_INPUT_KEY)?;
@@ -94,9 +31,7 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
 
 fn part_1(input: &[Rotation]) -> RisResult<usize> {
     ris_log::info!("apply rotations...");
-    let mut dial = Dial::<POSITIONS> {
-        position: 50,
-    };
+    let mut dial = Dial::<POSITIONS> { position: 50 };
 
     let mut counter = 0;
 
@@ -113,19 +48,22 @@ fn part_1(input: &[Rotation]) -> RisResult<usize> {
 
 fn part_2(input: &[Rotation]) -> RisResult<usize> {
     ris_log::info!("apply rotations...");
-    let mut dial = Dial::<POSITIONS> {
-        position: 50,
-    };
-    
-    ris_log::trace!("{:?}", dial);
+    let mut dial = Dial::<POSITIONS> { position: 50 };
+
     let mut counter = 0;
     for rotation in input.iter() {
-        let Rotation { direction, mut clicks } = *rotation;
+        let Rotation {
+            direction,
+            mut clicks,
+        } = *rotation;
 
         while clicks != 0 {
             clicks -= 1;
 
-            dial.add(Rotation {direction,clicks: 1})?;
+            dial.add(Rotation {
+                direction,
+                clicks: 1,
+            })?;
 
             if dial.position == 0 {
                 counter += 1;
@@ -134,4 +72,68 @@ fn part_2(input: &[Rotation]) -> RisResult<usize> {
     }
 
     Ok(counter)
+}
+
+#[derive(Debug, Clone, Copy)]
+enum Direction {
+    Left,
+    Right,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct Rotation {
+    direction: Direction,
+    clicks: usize,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct Dial<const CLICKS: usize> {
+    position: usize,
+}
+
+impl<const T: usize> Dial<T> {
+    fn add(&mut self, rotation: Rotation) -> RisResult<()> {
+        let clicks_to_apply = rotation.clicks % T;
+
+        match rotation.direction {
+            Direction::Left => {
+                if clicks_to_apply > self.position {
+                    self.position += T - clicks_to_apply;
+                } else {
+                    self.position -= clicks_to_apply;
+                }
+            }
+            Direction::Right => {
+                self.position = self
+                    .position
+                    .checked_add(clicks_to_apply)
+                    .into_ris_error()?;
+
+                if self.position >= T {
+                    self.position -= T;
+                }
+            }
+        }
+
+        Ok(())
+    }
+}
+
+impl TryFrom<&str> for Rotation {
+    type Error = RisError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let direction_str = &value[0..1];
+        let clicks_str = &value[1..];
+
+        let direction = match direction_str.to_lowercase().as_str() {
+            "l" => Direction::Left,
+            "r" => Direction::Right,
+            _ => return ris_error::new_result!("invalid direction: {}", direction_str),
+        };
+
+        let clicks = clicks_str.parse()?;
+
+        Ok(Rotation { direction, clicks })
+    }
 }
