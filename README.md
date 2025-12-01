@@ -37,4 +37,4 @@ To run a solution, pass the day number as the first argument:
 
 For example this will run the solution for day 1:
 
-    cargo run -r -- 1
+    cargo run -r 1
