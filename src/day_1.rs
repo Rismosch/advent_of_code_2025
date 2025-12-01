@@ -35,8 +35,8 @@ fn part_1(input: &[Rotation]) -> RisResult<usize> {
 
     let mut counter = 0;
 
-    for rotation in input.iter() {
-        dial.add(*rotation)?;
+    for &rotation in input.iter() {
+        dial.add(rotation)?;
 
         if dial.position == 0 {
             counter += 1;
@@ -51,11 +51,11 @@ fn part_2(input: &[Rotation]) -> RisResult<usize> {
     let mut dial = Dial::<POSITIONS> { position: 50 };
 
     let mut counter = 0;
-    for rotation in input.iter() {
+    for &rotation in input.iter() {
         let Rotation {
             direction,
             mut clicks,
-        } = *rotation;
+        } = rotation;
 
         // surely there's a better way than this, but
         // the input isn't that big, and it takes about

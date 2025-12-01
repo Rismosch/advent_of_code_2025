@@ -105,11 +105,11 @@ fn log_thread(receiver: Receiver<LogMessage>, mut appenders: Vec<Box<dyn IAppend
         }
     }
 
-    let final_log_message = LogMessage::Plain(String::from("log thread ended"));
+    //let final_log_message = LogMessage::Plain(String::from("log thread ended"));
 
-    for appender in appenders.iter_mut() {
-        appender.print(&final_log_message);
-    }
+    //for appender in appenders.iter_mut() {
+    //    appender.print(&final_log_message);
+    //}
 }
 
 pub fn log_level() -> LogLevel {

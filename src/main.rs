@@ -6,6 +6,7 @@ use std::path::PathBuf;
 use ris_error::prelude::*;
 use ris_log::constructed_log_message::ConstructedLogFormatArgs;
 use ris_log::log::IAppender;
+use ris_log::log::LogGuard;
 use ris_log::log_level::LogLevel;
 use ris_log::log_message::LogMessage;
 
@@ -56,11 +57,11 @@ fn main() -> RisResult<()> {
     // parse args
     let raw_args = std::env::args().collect::<Vec<_>>();
     if raw_args.len() < 2 {
-        return print_usage("too few arguments");
+        return print_usage(log_guard, "too few arguments");
     }
 
     if raw_args.len() > 2 {
-        return print_usage("too many arguments");
+        return print_usage(log_guard, "too many arguments");
     }
 
     let day = raw_args[1].trim();
@@ -70,7 +71,7 @@ fn main() -> RisResult<()> {
 
     match day {
         "1" => day_1::run(&mut answer)?,
-        _ => return print_usage(format!("invalid day number: {}", day)),
+        _ => return print_usage(log_guard, format!("invalid day number: {}", day)),
     }
 
     // print output
@@ -90,15 +91,13 @@ fn main() -> RisResult<()> {
     Ok(())
 }
 
-fn print_usage(message: impl AsRef<str>) -> RisResult<()> {
+fn print_usage(log_guard: LogGuard, message: impl AsRef<str>) -> RisResult<()> {
     ris_log::error!("{}", message.as_ref());
+    drop(log_guard);
 
-    let mut message = String::new();
-    message.push_str("\nusage:");
-    message.push_str("\n\tcargo run -r -- <day number>");
-
-    let log_message = LogMessage::Plain(message);
-    ris_log::log::forward_to_appenders(log_message);
+    eprintln!();
+    eprintln!("usage:");
+    eprintln!("\tcargo run -r -- <day number>");
 
     Ok(())
 }
