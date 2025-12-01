@@ -25,6 +25,10 @@ A puzzle input file must have the format as below. Notice how the file has no ex
 
     day_<day number>
 
+For example, the file below holds the puzzle input for day 1:
+
+    ./puzzle_input/day_1
+
 # Usage
 
 To run a solution, pass the day number as the first argument:
