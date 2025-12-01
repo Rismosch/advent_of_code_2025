@@ -19,17 +19,17 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     }
 
     ris_log::info!("run part 1...");
-    let result = part_1(&rotations)?;
+    let result = run_part_1(&rotations)?;
     answer.add(format!("1: {}", result));
 
     ris_log::info!("run part 2...");
-    let result = part_2(&rotations)?;
+    let result = run_part_2(&rotations)?;
     answer.add(format!("2: {}", result));
 
     Ok(())
 }
 
-fn part_1(input: &[Rotation]) -> RisResult<usize> {
+fn run_part_1(input: &[Rotation]) -> RisResult<usize> {
     ris_log::info!("apply rotations...");
     let mut dial = Dial::<POSITIONS> { position: 50 };
 
@@ -46,7 +46,7 @@ fn part_1(input: &[Rotation]) -> RisResult<usize> {
     Ok(counter)
 }
 
-fn part_2(input: &[Rotation]) -> RisResult<usize> {
+fn run_part_2(input: &[Rotation]) -> RisResult<usize> {
     ris_log::info!("apply rotations...");
     let mut dial = Dial::<POSITIONS> { position: 50 };
 
@@ -54,15 +54,13 @@ fn part_2(input: &[Rotation]) -> RisResult<usize> {
     for &rotation in input.iter() {
         let Rotation {
             direction,
-            mut clicks,
+            clicks,
         } = rotation;
 
         // surely there's a better way than this, but
         // the input isn't that big, and it takes about
         // a millisecond on my machine, so what gives?
-        while clicks != 0 {
-            clicks -= 1;
-
+        for _ in 0..clicks {
             dial.add(Rotation {
                 direction,
                 clicks: 1,
