@@ -36,9 +36,7 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
 
 fn run_part_1(input: &[std::ops::Range<usize>]) -> usize {
     let mut sum = 0;
-    for (i, range) in input.iter().enumerate() {
-        ris_log::info!("run range... {}/{} {:?}", i + 1, input.len(), range,);
-
+    for range in input.iter() {
         for n in range.clone() {
             if !is_valid_1(n) {
                 sum += n;
@@ -51,9 +49,7 @@ fn run_part_1(input: &[std::ops::Range<usize>]) -> usize {
 
 fn run_part_2(input: &[std::ops::Range<usize>]) -> usize {
     let mut sum = 0;
-    for (i, range) in input.iter().enumerate() {
-        ris_log::info!("run range... {}/{} {:?}", i + 1, input.len(), range,);
-
+    for range in input.iter() {
         for n in range.clone() {
             if !is_valid_2(n) {
                 sum += n;
@@ -104,6 +100,8 @@ fn is_valid_2(n: usize) -> bool {
 
             if v0 == v1 {
                 matches += 1;
+            } else {
+                break;
             }
         }
 
