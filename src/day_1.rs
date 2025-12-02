@@ -51,10 +51,7 @@ fn run_part_2(input: &[Rotation]) -> RisResult<usize> {
 
     let mut counter = 0;
     for &rotation in input.iter() {
-        let Rotation {
-            direction,
-            clicks,
-        } = rotation;
+        let Rotation { direction, clicks } = rotation;
 
         // surely there's a better way than this, but
         // the input isn't that big, and it takes about
@@ -94,7 +91,7 @@ struct Dial<const T: usize> {
 impl<const T: usize> Dial<T> {
     fn add(&mut self, rotation: Rotation) -> RisResult<()> {
         let clicks_to_apply = rotation.clicks % T;
-        
+
         match rotation.direction {
             Direction::Left => {
                 if clicks_to_apply > self.position {

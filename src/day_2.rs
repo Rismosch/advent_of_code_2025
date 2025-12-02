@@ -37,14 +37,9 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
 fn run_part_1(input: &[std::ops::Range<usize>]) -> usize {
     let mut sum = 0;
     for (i, range) in input.iter().enumerate() {
-        ris_log::info!(
-            "run range... {}/{} {:?}",
-            i + 1,
-            input.len(),
-            range,
-        );
+        ris_log::info!("run range... {}/{} {:?}", i + 1, input.len(), range,);
 
-        for n in range.clone().into_iter() {
+        for n in range.clone() {
             if !is_valid_1(n) {
                 sum += n;
             }
@@ -57,26 +52,21 @@ fn run_part_1(input: &[std::ops::Range<usize>]) -> usize {
 fn run_part_2(input: &[std::ops::Range<usize>]) -> usize {
     let mut sum = 0;
     for (i, range) in input.iter().enumerate() {
-        ris_log::info!(
-            "run range... {}/{} {:?}",
-            i + 1,
-            input.len(),
-            range,
-        );
+        ris_log::info!("run range... {}/{} {:?}", i + 1, input.len(), range,);
 
-        for n in range.clone().into_iter() {
+        for n in range.clone() {
             if !is_valid_2(n) {
                 sum += n;
             }
         }
     }
-    
+
     sum
 }
 
 fn is_valid_1(n: usize) -> bool {
     let n_string = n.to_string();
-    if n_string.len() % 2 != 0 {
+    if !n_string.len().is_multiple_of(2) {
         return true;
     }
 
@@ -94,7 +84,7 @@ fn is_valid_2(n: usize) -> bool {
     // find divisors
     let mut divisors = Vec::new();
     for i in 1..len {
-        if len % i == 0 {
+        if len.is_multiple_of(i) {
             divisors.push(i);
         }
     }
