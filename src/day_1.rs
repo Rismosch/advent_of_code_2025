@@ -1,7 +1,6 @@
 use ris_error::prelude::*;
 
 const PUZZLE_INPUT_KEY: &str = "day_1";
-const POSITIONS: usize = 100;
 
 pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     ris_log::info!("read input...");
@@ -31,7 +30,7 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
 
 fn run_part_1(input: &[Rotation]) -> RisResult<usize> {
     ris_log::info!("apply rotations...");
-    let mut dial = Dial::<POSITIONS> { position: 50 };
+    let mut dial = Dial::<100> { position: 50 };
 
     let mut counter = 0;
 
@@ -48,7 +47,7 @@ fn run_part_1(input: &[Rotation]) -> RisResult<usize> {
 
 fn run_part_2(input: &[Rotation]) -> RisResult<usize> {
     ris_log::info!("apply rotations...");
-    let mut dial = Dial::<POSITIONS> { position: 50 };
+    let mut dial = Dial::<100> { position: 50 };
 
     let mut counter = 0;
     for &rotation in input.iter() {
@@ -88,14 +87,14 @@ struct Rotation {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Dial<const CLICKS: usize> {
+struct Dial<const T: usize> {
     position: usize,
 }
 
 impl<const T: usize> Dial<T> {
     fn add(&mut self, rotation: Rotation) -> RisResult<()> {
         let clicks_to_apply = rotation.clicks % T;
-
+        
         match rotation.direction {
             Direction::Left => {
                 if clicks_to_apply > self.position {

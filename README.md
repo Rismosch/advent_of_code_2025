@@ -19,7 +19,7 @@ Then, make a folder that holds all your puzzle inputs:
 
     mkdir puzzle_input
 
-Copy your puzzle inputs as files into this folder. 1 file for the input of 1 day.
+Copy your puzzle inputs as files into this folder. One file for the input of one day.
 
 A puzzle input file must have the format as below. Notice how the file has no extension:
 
