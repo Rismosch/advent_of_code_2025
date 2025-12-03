@@ -46,7 +46,7 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     Ok(())
 }
 
-fn run_part_1(banks: &Vec<Vec<usize>>) -> RisResult<usize> {
+fn run_part_1(banks: &[Vec<usize>]) -> RisResult<usize> {
     let mut sum = 0;
 
     for bank in banks.iter() {
@@ -72,7 +72,7 @@ fn run_part_1(banks: &Vec<Vec<usize>>) -> RisResult<usize> {
     Ok(sum)
 }
 
-fn run_part_2(banks: &Vec<Vec<usize>>) -> RisResult<usize> {
+fn run_part_2(banks: &[Vec<usize>]) -> RisResult<usize> {
     let mut sum = 0;
 
     for bank in banks.iter() {
@@ -83,10 +83,7 @@ fn run_part_2(banks: &Vec<Vec<usize>>) -> RisResult<usize> {
             batteries.push(*battery);
         }
 
-        let mut batteries = batteries
-            .into_iter()
-            .rev()
-            .collect::<Vec<_>>();
+        let mut batteries = batteries.into_iter().rev().collect::<Vec<_>>();
 
         for &battery in batteries_to_check {
             if battery < batteries[0] {
@@ -109,7 +106,10 @@ fn run_part_2(banks: &Vec<Vec<usize>>) -> RisResult<usize> {
                 }
             }
 
-            // ripple is over, copy remaining batteries
+            #[allow(clippy::needless_range_loop)]
+            // justification: the loop mirrors the one above, by continuing
+            // where the upper left off. also, the suggested fix by clippy
+            // is longer, and imo less understandable as it stands right now
             for i in new_batteries.len()..new_batteries.capacity() {
                 new_batteries.push(batteries[i]);
             }
