@@ -39,11 +39,16 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     let result = run_part_1(&banks)?;
     answer.add(format!("1: {}", result));
 
+    ris_log::info!("run part 2...");
+    let result = run_part_2(&banks)?;
+    answer.add(format!("2: {}", result));
+
     Ok(())
 }
 
 fn run_part_1(banks: &Vec<Vec<usize>>) -> RisResult<usize> {
     let mut sum = 0;
+
     for bank in banks.iter() {
         let mut batteries = bank.iter().rev();
         let mut battery_2 = batteries.next().into_ris_error()?;
@@ -62,6 +67,67 @@ fn run_part_1(banks: &Vec<Vec<usize>>) -> RisResult<usize> {
 
         let joltage = battery_1 * 10 + battery_2;
         sum += joltage;
+    }
+
+    Ok(sum)
+}
+
+fn run_part_2(banks: &Vec<Vec<usize>>) -> RisResult<usize> {
+    let mut sum = 0;
+
+    for bank in banks.iter() {
+        let mut batteries_to_check = bank.iter().rev();
+        let mut batteries = Vec::with_capacity(12);
+        for _ in 0..batteries.capacity() {
+            let battery = batteries_to_check.next().into_ris_error()?;
+            batteries.push(*battery);
+        }
+
+        let mut batteries = batteries
+            .into_iter()
+            .rev()
+            .collect::<Vec<_>>();
+
+        for &battery in batteries_to_check {
+            if battery < batteries[0] {
+                continue;
+            }
+
+            // produce ripple
+            let mut new_batteries = Vec::with_capacity(batteries.capacity());
+            new_batteries.push(battery);
+
+            // ripple
+            for i in new_batteries.len()..new_batteries.capacity() {
+                let i1 = i - 1;
+                let i2 = i;
+
+                if batteries[i1] >= batteries[i2] {
+                    new_batteries.push(batteries[i1]);
+                } else {
+                    break;
+                }
+            }
+
+            // ripple is over, copy remaining batteries
+            for i in new_batteries.len()..new_batteries.capacity() {
+                new_batteries.push(batteries[i]);
+            }
+
+            batteries = new_batteries;
+        }
+
+        let mut joltage = 0;
+        for (i, battery) in batteries.iter().rev().enumerate() {
+            let mut power = 1;
+            for _ in 0..i {
+                power *= 10;
+            }
+
+            joltage += battery * power;
+        }
+
+        sum += joltage
     }
 
     Ok(sum)
