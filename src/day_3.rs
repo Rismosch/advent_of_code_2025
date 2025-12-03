@@ -28,7 +28,6 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
                 '9' => 9,
                 _ => return ris_error::new_result!("invalid battery: {}", c),
             };
-
             bank.push(battery);
         }
 
@@ -76,6 +75,7 @@ fn run_part_2(banks: &[Vec<usize>]) -> RisResult<usize> {
     let mut sum = 0;
 
     for bank in banks.iter() {
+        // produce initial state of batteries
         let mut batteries_to_check = bank.iter().rev();
         let mut batteries = Vec::with_capacity(12);
         for _ in 0..batteries.capacity() {
@@ -87,6 +87,8 @@ fn run_part_2(banks: &[Vec<usize>]) -> RisResult<usize> {
 
         for &battery in batteries_to_check {
             if battery < batteries[0] {
+                // no ripple required
+                // no higher joltage can be produced with this battery
                 continue;
             }
 
@@ -94,7 +96,6 @@ fn run_part_2(banks: &[Vec<usize>]) -> RisResult<usize> {
             let mut new_batteries = Vec::with_capacity(batteries.capacity());
             new_batteries.push(battery);
 
-            // ripple
             for i in new_batteries.len()..new_batteries.capacity() {
                 let i1 = i - 1;
                 let i2 = i;
@@ -106,17 +107,22 @@ fn run_part_2(banks: &[Vec<usize>]) -> RisResult<usize> {
                 }
             }
 
+            // ripple is over, fill with remaining batteries
+
             #[allow(clippy::needless_range_loop)]
-            // justification: the loop mirrors the one above, by continuing
-            // where the upper left off. also, the suggested fix by clippy
-            // is longer, and imo less understandable as it stands right now
+            // justification: the loop mirrors the one above, by
+            // continuing where it left off. also, the suggested
+            // fix by clippy is longer, and imo less understandable
+            // than the one below
             for i in new_batteries.len()..new_batteries.capacity() {
                 new_batteries.push(batteries[i]);
             }
 
+            // apply new state
             batteries = new_batteries;
         }
 
+        // calculate joltage
         let mut joltage = 0;
         for (i, battery) in batteries.iter().rev().enumerate() {
             let mut power = 1;
