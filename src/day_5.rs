@@ -50,9 +50,7 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     ris_log::info!("sort ids...");
     ids.sort();
 
-    ris_log::trace!("ranges: {:#?}", id_ranges);
-
-    ris_log::info!("merge ranges...");
+    ris_log::info!("resolve overlaps and merge ranges...");
     let mut merged_id_ranges = Vec::new();
     let mut i = 0;
     loop {
@@ -80,14 +78,12 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
         merged_id_ranges.push(merged_id_range);
     }
 
-    ris_log::trace!("merged ranges: {:#?}", merged_id_ranges);
-
     ris_log::info!("run part 1...");
     let result = run_part_1(&merged_id_ranges, &ids)?;
     answer.add(format!("1: {}", result));
 
     ris_log::info!("run part 2...");
-    let result = run_part_2(&merged_id_ranges, &ids);
+    let result = run_part_2(&merged_id_ranges);
     answer.add(format!("2: {}", result));
 
     Ok(())
@@ -109,7 +105,6 @@ fn run_part_1(id_ranges: &[IdRange], ids: &[usize]) -> RisResult<usize> {
         };
 
         if id < range.min {
-            // id is spoiled
             i += 1;
             continue;
         }
@@ -125,6 +120,13 @@ fn run_part_1(id_ranges: &[IdRange], ids: &[usize]) -> RisResult<usize> {
     Ok(sum)
 }
 
-fn run_part_2(id_ranges: &[IdRange], ids: &[usize]) -> usize {
-    42
+fn run_part_2(id_ranges: &[IdRange]) -> usize {
+    let mut sum = 0;
+
+    for range in id_ranges.iter() {
+        let fresh_ids = range.max - range.min + 1;
+        sum += fresh_ids;
+    }
+
+    sum
 }
