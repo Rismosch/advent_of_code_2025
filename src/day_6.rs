@@ -41,6 +41,18 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     ris_log::info!("read input...");
     let input = crate::read_puzzle_input(PUZZLE_INPUT_KEY)?;
 
+    ris_log::info!("run part 1...");
+    let result = run_part_1(&input)?;
+    answer.add(format!("1: {}", result));
+
+    ris_log::info!("run part 2...");
+    let result = run_part_2(&input)?;
+    answer.add(format!("2: {}", result));
+
+    Ok(())
+}
+
+fn run_part_1(input: &str) -> RisResult<usize> {
     ris_log::info!("parse input...");
     let mut lines = input.lines().collect::<Vec<_>>();
     let last = lines.len() - 1;
@@ -99,18 +111,92 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
         }
     }
 
-    ris_log::info!("run part 1...");
-    let result = run_part_1(&problems);
-    answer.add(format!("1: {}", result));
-
-    Ok(())
-}
-
-fn run_part_1(problems: &[Problem]) -> usize {
+    ris_log::info!("solve problems...");
     let mut sum = 0;
     for problem in problems {
         let result = problem.solve();
         sum += result
     }
-    sum
+
+    Ok(sum)
+}
+
+fn run_part_2(input: &str) -> RisResult<usize> {
+    ris_log::info!("read character matrix...");
+    let mut m = Vec::new();
+    for line in input.lines() {
+        let mut v = Vec::new();
+        for c in line.chars() {
+            v.push(c);
+        }
+        m.push(v);
+    }
+
+    ris_log::info!("transpose matrix...");
+    let width = m[0].len();
+    let height = m.len();
+
+    let mut t = Vec::new();
+    for ix in 0..width {
+        let mut v = Vec::new();
+        for iy in 0..height {
+            let c = m[iy][ix];
+            v.push(c);
+        }
+        t.push(v);
+    }
+
+    ris_log::info!("parse matrix and build problem...");
+    let mut problems = Vec::new();
+    for v in t.iter() {
+        let operation_char = v.last().into_ris_error()?;
+        match *operation_char {
+            '+' => {
+                let problem = Problem {
+                    numbers: Vec::new(),
+                    operation: Operation::Addition,
+                };
+                problems.push(problem);
+            },
+            '*' => {
+                let problem = Problem {
+                    numbers: Vec::new(),
+                    operation: Operation::Multiplication,
+                };
+                problems.push(problem);
+            },
+            ' ' => (),
+            _ => return ris_error::new_result!("invalid operation: '{}'", operation_char),
+        }
+
+        let problem = problems.last_mut().into_ris_error()?;
+        let start = 0usize;
+        let end = v.len() - 1;
+
+        let mut number = 0usize;
+        for i in start..end {
+            let c = v[i];
+            if c == ' ' {
+                continue;
+            }
+
+            let digit = c.to_digit(10).into_ris_error()?;
+            number = number * 10 + digit as usize;
+        }
+
+        if number == 0 {
+            continue;
+        }
+
+        problem.numbers.push(number);
+    }
+
+    ris_log::info!("solve problems...");
+    let mut sum = 0;
+    for problem in problems {
+        let result = problem.solve();
+        sum += result
+    }
+
+    Ok(sum)
 }
