@@ -20,6 +20,16 @@ const PUZZLE_INPUT_PATH: &str = "puzzle_input";
 
 const LOG_LEVEL: LogLevel = LogLevel::Trace;
 
+const SOLVERS: &[fn(&mut Answer) -> RisResult<()>] = &[
+    day_1::run,
+    day_2::run,
+    day_3::run,
+    day_4::run,
+    day_5::run,
+    day_6::run,
+    day_7::run,
+];
+
 struct ConsoleAppender;
 
 impl IAppender for ConsoleAppender {
@@ -75,23 +85,13 @@ fn main() -> RisResult<()> {
     // run
     let mut answer = Answer::default();
 
-    let callbacks = [
-        day_1::run,
-        day_2::run,
-        day_3::run,
-        day_4::run,
-        day_5::run,
-        day_6::run,
-        day_7::run,
-    ];
-
     match day {
         "all" => {
-            for (i, callback) in callbacks.iter().enumerate() {
+            for (i, solver) in SOLVERS.iter().enumerate() {
                 let day_number = i + 1;
                 ris_log::info!("run day {}...", day_number);
                 answer.add(format!("day {}:", day_number));
-                if let Err(e) = callback(&mut answer) {
+                if let Err(e) = solver(&mut answer) {
                     ris_log::error!("day {} failed: {:?}", day_number, e);
                     answer.add(format!("error: {}", e.message));
                 };
@@ -104,7 +104,7 @@ fn main() -> RisResult<()> {
                 Err(_) => return print_usage(log_guard, format!("invalid day number: {}", day)),
             };
             let min = 1;
-            let max = callbacks.len();
+            let max = SOLVERS.len();
             if number < min || number > max {
                 return print_usage(
                     log_guard,
@@ -114,8 +114,8 @@ fn main() -> RisResult<()> {
                     ),
                 );
             }
-            let callback = callbacks[number - 1];
-            callback(&mut answer)?
+            let solver = SOLVERS[number - 1];
+            solver(&mut answer)?
         }
     }
 
