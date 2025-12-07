@@ -11,9 +11,10 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
 
     ris_log::info!("parse start...");
     let start_str = lines.next().into_ris_error()?;
-    let (start, _) = start_str.chars()
+    let (start, _) = start_str
+        .chars()
         .enumerate()
-        .find(|(_, c) | *c == 'S')
+        .find(|(_, c)| *c == 'S')
         .into_ris_error()?;
 
     ris_log::info!("parse manifold...");

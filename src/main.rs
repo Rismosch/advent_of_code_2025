@@ -75,7 +75,7 @@ fn main() -> RisResult<()> {
     // run
     let mut answer = Answer::default();
 
-    let day_callbacks = vec![
+    let day_callbacks = [
         day_1::run,
         day_2::run,
         day_3::run,
