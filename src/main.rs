@@ -3,6 +3,7 @@ mod day_2;
 mod day_3;
 mod day_4;
 mod day_5;
+mod day_6;
 
 use std::io::Read;
 use std::path::PathBuf;
@@ -79,6 +80,7 @@ fn main() -> RisResult<()> {
         "3" => day_3::run(&mut answer)?,
         "4" => day_4::run(&mut answer)?,
         "5" => day_5::run(&mut answer)?,
+        "6" => day_6::run(&mut answer)?,
         _ => return print_usage(log_guard, format!("invalid day number: {}", day)),
     }
 
