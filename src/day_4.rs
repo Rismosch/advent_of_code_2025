@@ -40,7 +40,7 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     answer.add(format!("1: {}", result));
 
     ris_log::info!("run part 2...");
-    let result = run_part_2(&shelf);
+    let result = run_part_2(&mut shelf);
     answer.add(format!("2: {}", result));
 
     Ok(())
@@ -48,17 +48,6 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
 }
 
 fn run_part_1(shelf: &[Vec<Entry>]) -> usize {
-    let offsets = [
-        (-1, -1),
-        (0, -1),
-        (1, -1),
-        (-1, 0),
-        (1, 0),
-        (-1, 1),
-        (0, 1),
-        (1, 1),
-    ];
-
     let mut sum = 0;
     for (iy, entries) in shelf.iter().enumerate() {
         for (ix, &entry) in entries.iter().enumerate() {
@@ -66,18 +55,7 @@ fn run_part_1(shelf: &[Vec<Entry>]) -> usize {
                 continue;
             }
 
-            let mut neighbors = 0;
-            for offset in offsets.iter() {
-                let ix = ix as isize + offset.0;
-                let iy = iy as isize + offset.1;
-                let entry = index_shelf(&shelf, ix, iy);
-                if entry == Some(Entry::Roll) {
-                    neighbors += 1;
-                }
-            }
-
-            let can_access = neighbors < 4;
-            if can_access {
+            if can_access(shelf, ix, iy) {
                 sum += 1;
             }
         }
@@ -86,8 +64,36 @@ fn run_part_1(shelf: &[Vec<Entry>]) -> usize {
     sum
 }
 
-fn run_part_2(shelf: &[Vec<Entry>]) -> usize {
-    42
+fn run_part_2(shelf: &mut [Vec<Entry>]) -> usize {
+    let mut sum = 0;
+
+    loop {
+        let mut roll_was_removed = false;
+
+        for iy in 0..shelf.len() {
+            let end = shelf[iy].len();
+            for ix in 0..end {
+                let entry = shelf[iy][ix];
+                if entry == Entry::Empty {
+                    continue;
+                }
+
+                if !can_access(shelf, ix, iy) {
+                    continue;
+                }
+
+                sum += 1;
+                shelf[iy][ix] = Entry::Empty;
+                roll_was_removed = true;
+            }
+        }
+
+        if !roll_was_removed {
+            break;
+        }
+    }
+
+    sum
 }
 
 fn index_shelf(shelf: &[Vec<Entry>], ix: isize, iy: isize) -> Option<Entry> {
@@ -99,3 +105,29 @@ fn index_shelf(shelf: &[Vec<Entry>], ix: isize, iy: isize) -> Option<Entry> {
     let entry = entries.get(ix as usize)?;
     Some(*entry)
 }
+
+fn can_access(shelf: &[Vec<Entry>], ix: usize, iy: usize) -> bool {
+    let offsets = [
+        (-1, -1),
+        (0, -1),
+        (1, -1),
+        (-1, 0),
+        (1, 0),
+        (-1, 1),
+        (0, 1),
+        (1, 1),
+    ];
+
+    let mut neighbors = 0;
+    for offset in offsets.iter() {
+        let ix = ix as isize + offset.0;
+        let iy = iy as isize + offset.1;
+        let entry = index_shelf(&shelf, ix, iy);
+        if entry == Some(Entry::Roll) {
+            neighbors += 1;
+        }
+    }
+
+    neighbors < 4
+}
+
