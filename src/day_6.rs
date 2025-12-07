@@ -24,7 +24,7 @@ impl Problem {
                 }
 
                 sum
-            },
+            }
             Operation::Multiplication => {
                 let mut product = 1;
                 for number in self.numbers.iter() {
@@ -32,7 +32,7 @@ impl Problem {
                 }
 
                 product
-            },
+            }
         }
     }
 }
@@ -98,7 +98,7 @@ fn run_part_1(input: &str) -> RisResult<usize> {
     ris_log::info!("build problems...");
     let mut problems = Vec::new();
     for &operation in operations.iter() {
-        let problem = Problem{
+        let problem = Problem {
             numbers: Vec::new(),
             operation,
         };
@@ -139,6 +139,10 @@ fn run_part_2(input: &str) -> RisResult<usize> {
     let mut t = Vec::new();
     for ix in 0..width {
         let mut v = Vec::new();
+        #[allow(clippy::needless_range_loop)]
+        // justification: since we are indexing a matrix,
+        // having both indices written out like this makes
+        // the code much clearer
         for iy in 0..height {
             let c = m[iy][ix];
             v.push(c);
@@ -157,25 +161,23 @@ fn run_part_2(input: &str) -> RisResult<usize> {
                     operation: Operation::Addition,
                 };
                 problems.push(problem);
-            },
+            }
             '*' => {
                 let problem = Problem {
                     numbers: Vec::new(),
                     operation: Operation::Multiplication,
                 };
                 problems.push(problem);
-            },
+            }
             ' ' => (),
             _ => return ris_error::new_result!("invalid operation: '{}'", operation_char),
         }
 
         let problem = problems.last_mut().into_ris_error()?;
-        let start = 0usize;
-        let end = v.len() - 1;
 
         let mut number = 0usize;
-        for i in start..end {
-            let c = v[i];
+        let digit_count = v.len() - 1;
+        for &c in v.iter().take(digit_count) {
             if c == ' ' {
                 continue;
             }
