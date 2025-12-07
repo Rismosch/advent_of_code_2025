@@ -18,14 +18,11 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     let mut id_ranges = Vec::new();
     for line in lines.by_ref().take_while(|x| !x.is_empty()) {
         let splits = line.split('-').collect::<Vec<_>>();
-        let min_str = splits.get(0).into_ris_error()?;
+        let min_str = splits.first().into_ris_error()?;
         let max_str = splits.get(1).into_ris_error()?;
         let min = min_str.parse()?;
         let max = max_str.parse()?;
-        let id_range = IdRange {
-            min,
-            max,
-        };
+        let id_range = IdRange { min, max };
         id_ranges.push(Some(id_range));
     }
 
@@ -64,7 +61,7 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
         };
 
         for candidate in id_ranges.iter_mut().skip(i + 1) {
-            let Some(id_range) = candidate.clone() else {
+            let Some(id_range) = candidate else {
                 break;
             };
 
