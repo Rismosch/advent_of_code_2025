@@ -4,6 +4,7 @@ mod day_3;
 mod day_4;
 mod day_5;
 mod day_6;
+mod day_7;
 
 use std::io::Read;
 use std::path::PathBuf;
@@ -74,20 +75,48 @@ fn main() -> RisResult<()> {
     // run
     let mut answer = Answer::default();
 
+    let day_callbacks = vec![
+        day_1::run,
+        day_2::run,
+        day_3::run,
+        day_4::run,
+        day_5::run,
+        day_6::run,
+        day_7::run,
+    ];
+
+    let mut run_day = |number: usize| {
+        let callback = day_callbacks.get(number - 1).into_ris_error()?;
+        callback(&mut answer)
+    };
+
     match day {
-        "1" => day_1::run(&mut answer)?,
-        "2" => day_2::run(&mut answer)?,
-        "3" => day_3::run(&mut answer)?,
-        "4" => day_4::run(&mut answer)?,
-        "5" => day_5::run(&mut answer)?,
-        "6" => day_6::run(&mut answer)?,
+        "1" => run_day(1)?,
+        "2" => run_day(2)?,
+        "3" => run_day(3)?,
+        "4" => run_day(4)?,
+        "5" => run_day(5)?,
+        "6" => run_day(6)?,
+        "7" => run_day(7)?,
+        "all" => {
+            for (i, callback) in day_callbacks.iter().enumerate() {
+                let day_number = i + 1;
+                ris_log::info!("run day {}...", day_number);
+                answer.add(format!("day {}:", day_number));
+                if let Err(e) = callback(&mut answer) {
+                    ris_log::error!("day {} failed: {:?}", day_number, e);
+                    answer.add(format!("error: {}", e.message));
+                };
+                answer.add(String::new());
+            }
+        }
         _ => return print_usage(log_guard, format!("invalid day number: {}", day)),
     }
 
     // print output
     drop(log_guard);
     eprintln!();
-    eprintln!("answer:");
+    eprintln!("answers:");
     for message in answer.0 {
         println!("{}", message);
     }
@@ -107,7 +136,9 @@ fn print_usage(log_guard: LogGuard, message: impl AsRef<str>) -> RisResult<()> {
 
     eprintln!();
     eprintln!("usage:");
-    eprintln!("\tcargo run -r -- <day number>");
+    eprintln!("\tcargo run -r <day number>");
+    eprintln!();
+    eprintln!("pass `all` to run all days");
 
     Ok(())
 }
