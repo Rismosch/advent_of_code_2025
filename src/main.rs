@@ -75,7 +75,7 @@ fn main() -> RisResult<()> {
     // run
     let mut answer = Answer::default();
 
-    let day_callbacks = [
+    let callbacks = [
         day_1::run,
         day_2::run,
         day_3::run,
@@ -85,21 +85,9 @@ fn main() -> RisResult<()> {
         day_7::run,
     ];
 
-    let mut run_day = |number: usize| {
-        let callback = day_callbacks.get(number - 1).into_ris_error()?;
-        callback(&mut answer)
-    };
-
     match day {
-        "1" => run_day(1)?,
-        "2" => run_day(2)?,
-        "3" => run_day(3)?,
-        "4" => run_day(4)?,
-        "5" => run_day(5)?,
-        "6" => run_day(6)?,
-        "7" => run_day(7)?,
         "all" => {
-            for (i, callback) in day_callbacks.iter().enumerate() {
+            for (i, callback) in callbacks.iter().enumerate() {
                 let day_number = i + 1;
                 ris_log::info!("run day {}...", day_number);
                 answer.add(format!("day {}:", day_number));
@@ -110,7 +98,25 @@ fn main() -> RisResult<()> {
                 answer.add(String::new());
             }
         }
-        _ => return print_usage(log_guard, format!("invalid day number: {}", day)),
+        number_str => {
+            let number = match number_str.parse::<usize>() {
+                Ok(number) => number,
+                Err(_) => return print_usage(log_guard, format!("invalid day number: {}", day)),
+            };
+            let min = 1;
+            let max = callbacks.len();
+            if number < min || number > max {
+                return print_usage(
+                    log_guard,
+                    format!(
+                        "expected day number to be between {} and {}, but was {}",
+                        min, max, number
+                    ),
+                );
+            }
+            let callback = callbacks[number - 1];
+            callback(&mut answer)?
+        }
     }
 
     // print output
