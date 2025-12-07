@@ -44,7 +44,6 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     answer.add(format!("2: {}", result));
 
     Ok(())
-
 }
 
 fn run_part_1(shelf: &[Vec<Entry>]) -> usize {
@@ -122,7 +121,7 @@ fn can_access(shelf: &[Vec<Entry>], ix: usize, iy: usize) -> bool {
     for offset in offsets.iter() {
         let ix = ix as isize + offset.0;
         let iy = iy as isize + offset.1;
-        let entry = index_shelf(&shelf, ix, iy);
+        let entry = index_shelf(shelf, ix, iy);
         if entry == Some(Entry::Roll) {
             neighbors += 1;
         }
@@ -130,4 +129,3 @@ fn can_access(shelf: &[Vec<Entry>], ix: usize, iy: usize) -> bool {
 
     neighbors < 4
 }
-
