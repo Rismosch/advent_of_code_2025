@@ -17,11 +17,7 @@ struct Connection {
 
 impl Connection {
     fn new(a: Vec3, b: Vec3) -> Self {
-        let d = Vec3(
-            a.0 - b.0,
-            a.1 - b.1,
-            a.2 - b.2,
-        );
+        let d = Vec3(a.0 - b.0, a.1 - b.1, a.2 - b.2);
 
         let squared_magnitude = (d.0 * d.0 + d.1 * d.1 + d.2 * d.2) as usize;
 
@@ -53,11 +49,11 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
         let x = x_str.parse()?;
         let y = y_str.parse()?;
         let z = z_str.parse()?;
-    
+
         let p = Vec3(x, y, z);
         boxes.push(p);
     }
-    
+
     ris_log::info!("compute connections...");
     let mut all_possible_connections = Vec::new();
     for (i, &a) in boxes.iter().enumerate() {
@@ -79,18 +75,15 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     }
 
     ris_log::info!("sort circuits...");
-    circuits.sort_by(|lhs, rhs| rhs.len().cmp(&lhs.len()));
+    circuits.sort_by_key(|rhs| std::cmp::Reverse(rhs.len()));
 
     ris_log::info!("compute answer 1...");
-    let product = circuits.iter()
-        .map(|x| x.len())
-        .take(3)
-        .fold(1, |acc, x| acc * x);
+    let product = circuits.iter().map(|x| x.len()).take(3).product::<usize>();
     answer.add(format!("1: {}", product));
 
     ris_log::info!("continue building circuits...");
     let mut product = None;
-    while let Some(&connection) = connection_iter.next() {
+    for &connection in connection_iter {
         connect(&mut circuits, connection);
 
         // consider breaking early
@@ -105,7 +98,11 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
         }
 
         ris_log::info!("last connection found!");
-        let Connection { a, b, squared_magnitude: _ } = connection;
+        let Connection {
+            a,
+            b,
+            squared_magnitude: _,
+        } = connection;
         product = Some(a.0 * b.0);
         break;
     }
@@ -119,11 +116,12 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     Ok(())
 }
 
-fn connect(
-    circuits: &mut Vec<HashSet<Vec3>>,
-    connection: Connection,
-) {
-    let Connection { a, b, squared_magnitude: _ } = connection;
+fn connect(circuits: &mut Vec<HashSet<Vec3>>, connection: Connection) {
+    let Connection {
+        a,
+        b,
+        squared_magnitude: _,
+    } = connection;
 
     // a connection may bridge two existing circuits, so we search for two circuits
     let mut candidates = Vec::with_capacity(2);
@@ -161,14 +159,14 @@ fn connect(
             circuit.insert(a);
             circuit.insert(b);
             circuits.push(circuit);
-        },
+        }
         // exactly one candidate, insert
         1 => {
             let candidate = candidates[0];
             let circuit = &mut circuits[candidate];
             circuit.insert(a);
             circuit.insert(b);
-        },
+        }
         // connection will bridge the candidates, merge circuits
         _ => {
             let circuit_1 = circuits.swap_remove(candidates[1]);
@@ -176,6 +174,6 @@ fn connect(
             for junction_box in circuit_1 {
                 circuit_0.insert(junction_box);
             }
-        },
+        }
     }
 }
