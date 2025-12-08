@@ -106,6 +106,7 @@ impl Connection {
     fn new(a: Vec3, b: Vec3) -> Self {
         let d = Vec3(a.0 - b.0, a.1 - b.1, a.2 - b.2);
 
+        // sqrt is not necessary, because we only care about relations between magnitudes. any exponent can thus be ignored
         let squared_magnitude = (d.0 * d.0 + d.1 * d.1 + d.2 * d.2) as usize;
 
         Self {
