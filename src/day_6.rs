@@ -2,41 +2,6 @@ use ris_error::prelude::*;
 
 const PUZZLE_INPUT_KEY: &str = "day_6";
 
-#[derive(Debug, Clone, Copy)]
-enum Operation {
-    Addition,
-    Multiplication,
-}
-
-#[derive(Debug)]
-struct Problem {
-    numbers: Vec<usize>,
-    operation: Operation,
-}
-
-impl Problem {
-    fn solve(&self) -> usize {
-        match self.operation {
-            Operation::Addition => {
-                let mut sum = 0;
-                for number in self.numbers.iter() {
-                    sum += number;
-                }
-
-                sum
-            }
-            Operation::Multiplication => {
-                let mut product = 1;
-                for number in self.numbers.iter() {
-                    product *= number;
-                }
-
-                product
-            }
-        }
-    }
-}
-
 pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     ris_log::info!("read input...");
     let input = crate::read_puzzle_input(PUZZLE_INPUT_KEY)?;
@@ -201,4 +166,39 @@ fn run_part_2(input: &str) -> RisResult<usize> {
     }
 
     Ok(sum)
+}
+
+#[derive(Debug, Clone, Copy)]
+enum Operation {
+    Addition,
+    Multiplication,
+}
+
+#[derive(Debug)]
+struct Problem {
+    numbers: Vec<usize>,
+    operation: Operation,
+}
+
+impl Problem {
+    fn solve(&self) -> usize {
+        match self.operation {
+            Operation::Addition => {
+                let mut sum = 0;
+                for number in self.numbers.iter() {
+                    sum += number;
+                }
+
+                sum
+            }
+            Operation::Multiplication => {
+                let mut product = 1;
+                for number in self.numbers.iter() {
+                    product *= number;
+                }
+
+                product
+            }
+        }
+    }
 }

@@ -5,12 +5,6 @@ const PUZZLE_INPUT_KEY: &str = "day_4";
 const ROLL: char = '@';
 const EMPTY: char = '.';
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum Entry {
-    Roll,
-    Empty,
-}
-
 pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     ris_log::info!("read input...");
     let input = crate::read_puzzle_input(PUZZLE_INPUT_KEY)?;
@@ -128,4 +122,10 @@ fn can_access(shelf: &[Vec<Entry>], ix: usize, iy: usize) -> bool {
     }
 
     neighbors < 4
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Entry {
+    Roll,
+    Empty,
 }

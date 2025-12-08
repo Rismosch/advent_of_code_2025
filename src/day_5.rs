@@ -2,12 +2,6 @@ use ris_error::prelude::*;
 
 const PUZZLE_INPUT_KEY: &str = "day_5";
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct IdRange {
-    min: usize,
-    max: usize,
-}
-
 pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     ris_log::info!("read input...");
     let input = crate::read_puzzle_input(PUZZLE_INPUT_KEY)?;
@@ -126,4 +120,10 @@ fn run_part_2(id_ranges: &[IdRange]) -> usize {
     }
 
     sum
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct IdRange {
+    min: usize,
+    max: usize,
 }

@@ -5,30 +5,6 @@ use ris_error::prelude::*;
 const PUZZLE_INPUT_KEY: &str = "day_8";
 const CONNECTIONS: usize = 1000;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-struct Vec3(isize, isize, isize);
-
-#[derive(Debug, Clone, Copy)]
-struct Connection {
-    a: Vec3,
-    b: Vec3,
-    squared_magnitude: usize,
-}
-
-impl Connection {
-    fn new(a: Vec3, b: Vec3) -> Self {
-        let d = Vec3(a.0 - b.0, a.1 - b.1, a.2 - b.2);
-
-        let squared_magnitude = (d.0 * d.0 + d.1 * d.1 + d.2 * d.2) as usize;
-
-        Self {
-            a,
-            b,
-            squared_magnitude,
-        }
-    }
-}
-
 pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     ris_log::info!("read input...");
     let input = crate::read_puzzle_input(PUZZLE_INPUT_KEY)?;
@@ -114,6 +90,30 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     answer.add(format!("2: {}", product_string));
 
     Ok(())
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+struct Vec3(isize, isize, isize);
+
+#[derive(Debug, Clone, Copy)]
+struct Connection {
+    a: Vec3,
+    b: Vec3,
+    squared_magnitude: usize,
+}
+
+impl Connection {
+    fn new(a: Vec3, b: Vec3) -> Self {
+        let d = Vec3(a.0 - b.0, a.1 - b.1, a.2 - b.2);
+
+        let squared_magnitude = (d.0 * d.0 + d.1 * d.1 + d.2 * d.2) as usize;
+
+        Self {
+            a,
+            b,
+            squared_magnitude,
+        }
+    }
 }
 
 fn connect(circuits: &mut Vec<HashSet<Vec3>>, connection: Connection) {
