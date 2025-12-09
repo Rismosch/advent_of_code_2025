@@ -125,15 +125,13 @@ fn connect(circuits: &mut Vec<HashSet<Vec3>>, connection: Connection) {
     // a connection may bridge two existing circuits, so we search for two circuits
     let mut candidates = Vec::with_capacity(2);
 
-    let mut skip = false;
-
     for (i, circuit) in circuits.iter_mut().enumerate() {
         let contains_a = circuit.contains(&a);
         let contains_b = circuit.contains(&b);
 
-        skip = contains_a && contains_b;
-        if skip {
-            break;
+        if contains_a && contains_b {
+            // nothing to do, since one circuit already contains both boxes
+            return;
         }
 
         let can_insert = contains_a || contains_b;
@@ -144,11 +142,6 @@ fn connect(circuits: &mut Vec<HashSet<Vec3>>, connection: Connection) {
         if candidates.len() == 2 {
             break;
         }
-    }
-
-    if skip {
-        // nothing to do, since one circuit already contains both boxes
-        return;
     }
 
     match candidates.len() {
