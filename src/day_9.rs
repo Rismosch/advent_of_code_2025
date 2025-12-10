@@ -50,30 +50,39 @@ fn run_part_1(tiles: &[Vec2]) -> usize {
 }
 
 fn run_part_2(tiles: &[Vec2]) -> usize {
-    // idea on how to solve part 2, without exploding RAM and CPU performance:
+    //idea on how to solve part 2, without exploding RAM and CPU performance:
     //
-    // # step 1:
-    // resolve crossings and overlaps. these produce problems and the problem is easier to solve on
-    // loops that do not overlap/cross each other. to resolve the crossings/overlaps, produce
-    // additional tiles.
-    // this may require a bit of work, but is doable
+    //# step 1:
+    //resolve crossings and overlaps. these make things difficult in the later steps. the problem
+    //will be much easier to solve if we disallow crossings and overlaps. to resolve a crossing or
+    //overlap, produce additional tiles that split the connected line of tiles. this leads to more
+    //loops, but gets rid of every crossing and overlap. this may require some work, but i feel
+    //this is doable.
     //
-    // # step 2:
-    // find aabbs that tile the area. since no crossings exists, this has no edgecases. a simple
-    // greedy mesh algorithm can work through this.
+    //example:
     //
-    // # step 3:
-    // find a global aabb that encapsulates everything.
-    // this is very easy to do.
+    //    #...         #...
+    //    X...         X...
+    // #XXXXX#  =>  #XX#XX#
+    // ...X         ...X   
+    // ...#         ...#   
     //
-    // # step 4:
-    // find the aabbs in the global aabb, that are not covered by the aabbs found in step 2. a
-    // greedy mesh algorithm should do the trick.
-    // 
-    // # step 5:
-    // loop through all rectangles, like in part 2. but before computing the area, check whether
-    // the rectangle overlaps with any aabb found in step 4. if there is an overlap, the rectangle
-    // has holes and must be discarded. otherwise do the max check just in part 1.
+    //# step 2:
+    //find aabbs that tile the area. since no crossings exists, this has no edgecases. a simple
+    //greedy mesh algorithm can work through this.
+    //
+    //# step 3:
+    //find a global aabb that encapsulates everything.
+    //this is very easy to do.
+    //
+    //# step 4:
+    //find the aabbs in the global aabb, that are not covered by the aabbs found in step 2. a
+    //greedy mesh algorithm should do the trick.
+    //
+    //# step 5:
+    //loop through all rectangles, like in part 2. but before computing the area, check whether
+    //the rectangle overlaps with any aabb found in step 4. if there is an overlap, the rectangle
+    //has holes and must be discarded. otherwise do the max check just in part 1.
 
     42
 }
