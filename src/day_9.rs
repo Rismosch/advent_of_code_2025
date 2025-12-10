@@ -68,20 +68,24 @@ fn run_part_2(tiles: &[Vec2]) -> usize {
     // ...#         ...#   
     //
     //# step 2:
-    //find aabbs that tile the area. since no crossings exists, this has no edgecases. a simple
-    //greedy mesh algorithm can work through this.
+    //for every loop, find whether inside is left or right of any given line. this is necessary for
+    //the next step
     //
     //# step 3:
+    //use a greedy mesh algorithm to fill the space with aabbs. use the inside direction of step 2
+    //to know in which direction we must grow.
+    //
+    //# step 4:
     //find a global aabb that encapsulates everything.
     //this is very easy to do.
     //
-    //# step 4:
-    //find the aabbs in the global aabb, that are not covered by the aabbs found in step 2. a
+    //# step 5:
+    //find the aabbs in the global aabb, that are not covered by the aabbs found in step 3. a
     //greedy mesh algorithm should do the trick.
     //
-    //# step 5:
+    //# step 6:
     //loop through all rectangles, like in part 2. but before computing the area, check whether
-    //the rectangle overlaps with any aabb found in step 4. if there is an overlap, the rectangle
+    //the rectangle overlaps with any aabb found in step 5. if there is an overlap, the rectangle
     //has holes and must be discarded. otherwise do the max check just in part 1.
 
     42
