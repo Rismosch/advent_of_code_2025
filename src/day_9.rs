@@ -23,7 +23,18 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
         tiles.push(tile);
     }
 
-    ris_log::info!("find largest area...");
+    ris_log::info!("run part 1...");
+    let result = run_part_1(&tiles);
+    answer.add(format!("1: {}", result));
+
+    ris_log::info!("run part 2...");
+    let result = run_part_2(&tiles);
+    answer.add(format!("2: {}", result));
+
+    Ok(())
+}
+
+fn run_part_1(tiles: &[Vec2]) -> usize {
     let mut max_area = usize::MIN;
 
     for (i, &a) in tiles.iter().enumerate() {
@@ -35,13 +46,29 @@ pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
         }
     }
 
-    answer.add(format!("1: {}", max_area));
+    max_area
+}
 
-    Ok(())
+fn run_part_2(tiles: &[Vec2]) -> usize {
+    42
 }
 
 #[derive(Debug, Clone, Copy)]
 struct Vec2(usize, usize);
+
+#[derive(Debug, Clone, Copy)]
+enum Line {
+    Horizontal {
+        xa: usize,
+        xb: usize,
+        y: usize,
+    },
+    Vertical {
+        x: usize,
+        ya: usize,
+        yb: usize,
+    },
+}
 
 fn aabb_area(a: Vec2, b: Vec2) -> usize {
     let ax = a.0 as isize;
