@@ -111,11 +111,8 @@ fn run_part_2(tiles: &[Vec2]) -> RisResult<usize> {
 
             // check vertical
             for &VerticalLine { x, ya, yb } in vertical_lines.iter() {
-                intersects_with_line = 
-                    x > aabb.min.0 &&
-                    x < aabb.max.0 &&
-                    ya < aabb.max.1 &&
-                    yb > aabb.min.1;
+                intersects_with_line =
+                    x > aabb.min.0 && x < aabb.max.0 && ya < aabb.max.1 && yb > aabb.min.1;
 
                 if intersects_with_line {
                     break;
@@ -128,11 +125,8 @@ fn run_part_2(tiles: &[Vec2]) -> RisResult<usize> {
 
             // check horizontal
             for &HorizontalLine { xa, xb, y } in horizontal_lines.iter() {
-                intersects_with_line = 
-                    xa < aabb.max.0 &&
-                    xb > aabb.min.0 &&
-                    y > aabb.min.1 &&
-                    y < aabb.max.1;
+                intersects_with_line =
+                    xa < aabb.max.0 && xb > aabb.min.0 && y > aabb.min.1 && y < aabb.max.1;
 
                 if intersects_with_line {
                     break;
@@ -190,11 +184,6 @@ impl Aabb {
     }
 }
 
-trait Line {
-    fn collides_with(self, tile: Vec2) -> bool;
-    fn ends(self) -> [Vec2; 2];
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct VerticalLine {
     x: usize,
@@ -207,24 +196,4 @@ struct HorizontalLine {
     xa: usize,
     xb: usize,
     y: usize,
-}
-
-impl Line for VerticalLine {
-    fn collides_with(self, tile: Vec2) -> bool {
-        tile.0 == self.x && tile.1 >= self.ya && tile.1 <= self.yb
-    }
-
-    fn ends(self) -> [Vec2; 2] {
-        [Vec2(self.x, self.ya), Vec2(self.x, self.yb)]
-    }
-}
-
-impl Line for HorizontalLine {
-    fn collides_with(self, tile: Vec2) -> bool {
-        tile.0 >= self.xa && tile.0 <= self.xb && tile.1 == self.y
-    }
-
-    fn ends(self) -> [Vec2; 2] {
-        [Vec2(self.xa, self.y), Vec2(self.xb, self.y)]
-    }
 }
