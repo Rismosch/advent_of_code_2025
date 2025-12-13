@@ -1,6 +1,7 @@
 use ris_error::prelude::*;
 
-const PUZZLE_INPUT_KEY: &str = "day_9_custom";
+//const PUZZLE_INPUT_KEY: &str = "day_9_custom";
+const PUZZLE_INPUT_KEY: &str = "day_9";
 
 pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
     ris_log::info!("read input...");
@@ -116,6 +117,10 @@ fn run_part_2(tiles: &[Vec2]) -> RisResult<usize> {
         }
     }
 
+    // sort lines
+    ris_log::info!("sort lines...");
+    vertical_lines.sort_by(|lhs, rhs| lhs.x.cmp(&rhs.x));
+
     // find holes
     ris_log::info!("find holes...");
 
@@ -123,26 +128,24 @@ fn run_part_2(tiles: &[Vec2]) -> RisResult<usize> {
         min: Vec2(x_start, y_start),
         max: Vec2(x_end, y_end),
     } = global_aabb;
-    let x_end = x_end + 1; // bounds are inclusive
-    let y_end = y_end + 1;
 
-    for y in y_start..y_end {
+    for y in y_start..=y_end {
         // find all collisions
-        let mut vertical_collisions = Vec::new();
+        let mut vertical_collisions = Vec::<VerticalLine>::new();
         let mut horizontal_collisions = Vec::new();
 
-        for x in x_start..x_end {
+        for x in x_start..=x_end {
             let tile = Vec2(x, y);
 
             for line in vertical_lines.iter() {
                 if line.collides_with(tile) {
-                    vertical_collisions.push(line);
+                    vertical_collisions.push(*line);
                 }
             }
         }
 
         let mut x = x_start;
-        while x < x_end {
+        while x <= x_end {
             let tile = Vec2(x, y);
             let mut collision_found = false;
 
@@ -175,7 +178,7 @@ fn run_part_2(tiles: &[Vec2]) -> RisResult<usize> {
         //     +---+
         //         |
         //
-        let mut horizontal_collisions = horizontal_collisions
+        let horizontal_collisions = horizontal_collisions
             .iter()
             .map(|horizontal_line| {
                 #[derive(Debug, PartialEq, Eq)]
@@ -247,53 +250,6 @@ fn run_part_2(tiles: &[Vec2]) -> RisResult<usize> {
         }
 
         ris_log::trace!("{} holes: {:#?}", y, holes_x);
-
-        //let mut holes_x = Vec::new();
-
-        //let mut horizontal_line_index = if horizontal_collisions.is_empty() {
-        //    None
-        //} else {
-        //    Some(0)
-        //};
-        //let mut is_inside = false;
-
-        //for j in 1..vertical_collisions.len() {
-        //    let i = j - 1;
-        //    let xa = vertical_collisions[i].x;
-        //    let xb = vertical_collisions[j].x;
-        //    let hole = HorizontalLine { xa, xb, y };
-
-        //    match horizontal_line_index.as_mut() {
-        //        Some(ih) => {
-        //            let (horizontal_line, ends_have_same_direction) = horizontal_collisions[*ih];
-        //            if hole == **horizontal_line {
-        //                *ih += 1;
-        //                if *ih >= horizontal_collisions.len() {
-        //                    horizontal_line_index = None;
-        //                }
-
-        //                if !ends_have_same_direction {
-        //                    is_inside = !is_inside;
-        //                }
-        //            }
-        //        }
-        //        None => {
-        //            is_inside = !is_inside;
-
-        //            if !is_inside {
-        //                holes_x.push(hole);
-        //            }
-        //        }
-        //    }
-        //}
-
-        //if y == 5 {
-        //    ris_log::trace!("vertical: {:#?}", vertical_collisions);
-        //    ris_log::trace!("horizontal: {:#?}", horizontal_collisions);
-        //    ris_log::trace!("{} holes: {:#?}", y, holes_x);
-        //}
-
-        //ris_log::trace!("{} holes: {:#?}", y, holes_x);
     }
 
     // find largest rectangle
