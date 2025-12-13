@@ -7,6 +7,7 @@ mod day_6;
 mod day_7;
 mod day_8;
 mod day_9;
+mod day_10;
 
 use std::io::Read;
 use std::path::PathBuf;
@@ -32,6 +33,7 @@ const SOLVERS: &[fn(&mut Answer) -> RisResult<()>] = &[
     day_7::run,
     day_8::run,
     day_9::run,
+    day_10::run,
 ];
 
 struct ConsoleAppender;
