@@ -89,7 +89,11 @@ fn run_part_2(tiles: &[Vec2]) -> RisResult<usize> {
                 std::mem::swap(&mut t1, &mut t2);
             }
 
-            let line = VerticalLine{ x: t1.0, ya: t1.1, yb: t2.1 };
+            let line = VerticalLine {
+                x: t1.0,
+                ya: t1.1,
+                yb: t2.1,
+            };
             vertical_lines.push(line);
         } else if t1.1 == t2.1 {
             // horizontal
@@ -97,7 +101,11 @@ fn run_part_2(tiles: &[Vec2]) -> RisResult<usize> {
                 std::mem::swap(&mut t1, &mut t2);
             }
 
-            let line = HorizontalLine{ xa: t1.0, xb: t2.0, y: t1.1 };
+            let line = HorizontalLine {
+                xa: t1.0,
+                xb: t2.0,
+                y: t1.1,
+            };
             horizontal_lines.push(line);
         } else {
             return ris_error::new_result!(
@@ -118,16 +126,7 @@ fn run_part_2(tiles: &[Vec2]) -> RisResult<usize> {
     let x_end = x_end + 1; // bounds are inclusive
     let y_end = y_end + 1;
 
-    let mut current_aabb_index = None::<usize>;
-
-    //let mut holes = Vec::new();
-    //let mut holes_x = Vec::<Aabb>::new();
-    //let mut holes_x_previous = Vec::<Aabb>::new();
-
     for y in y_start..y_end {
-        
-        //let mut holes_x = Vec::new();
-
         // find all collisions
         let mut vertical_collisions = Vec::new();
         let mut horizontal_collisions = Vec::new();
@@ -140,17 +139,28 @@ fn run_part_2(tiles: &[Vec2]) -> RisResult<usize> {
                     vertical_collisions.push(line);
                 }
             }
+        }
+
+        let mut x = x_start;
+        while x < x_end {
+            let tile = Vec2(x, y);
+            let mut collision_found = false;
 
             for line in horizontal_lines.iter() {
-                if line.collides_with(tile) {
+                collision_found = line.collides_with(tile);
+                if collision_found {
+                    let width = line.xb - line.xa + 1;
+                    x += width;
+
                     horizontal_collisions.push(line);
+                    break;
                 }
             }
+
+            if !collision_found {
+                x += 1;
+            }
         }
-        
-        // sort collisions, for faster iteration later
-        vertical_collisions.sort_by(|lhs, rhs| lhs.x.cmp(&rhs.x));
-        horizontal_collisions.sort_by(|lhs, rhs| lhs.xa.cmp(&rhs.xb));
 
         // determine whether the ends of the horizontal line point in the same direction or not
         //
@@ -161,10 +171,12 @@ fn run_part_2(tiles: &[Vec2]) -> RisResult<usize> {
         //
         // example of different direction:
         //
-        //     |    
+        //     |
         //     +---+
         //         |
-        let mut horizontal_collisions = horizontal_collisions.iter()
+        //
+        let mut horizontal_collisions = horizontal_collisions
+            .iter()
             .map(|horizontal_line| {
                 #[derive(Debug, PartialEq, Eq)]
                 enum Direction {
@@ -195,56 +207,95 @@ fn run_part_2(tiles: &[Vec2]) -> RisResult<usize> {
                     }
                 }
 
-                //println!("y {} {:?} {:#?}", y, end_directions, vertical_collisions);
                 let ends_have_same_direction = end_directions[0] == end_directions[1];
                 (horizontal_line, ends_have_same_direction)
             })
             .collect::<Vec<_>>();
 
-            // find holes
-            let mut holes_x = Vec::new();
+        // find holes
+        let mut holes_x = Vec::new();
 
-            let mut horizontal_line_index = if horizontal_collisions.is_empty() {
-                None
-            } else {
-                Some(0)
+        let mut previous_inside = false;
+        let mut is_inside = true;
+
+        for j in 1..vertical_collisions.len() {
+            let i = j - 1;
+            let xa = vertical_collisions[i].x;
+            let xb = vertical_collisions[j].x;
+            let hole = HorizontalLine { xa, xb, y };
+
+            let horizontal_collision = horizontal_collisions.iter()
+                .find(|&&(&&horizontal_line, _)| horizontal_line == hole);
+
+            match horizontal_collision {
+                Some((_, ends_have_same_direction)) => {
+                    if *ends_have_same_direction {
+                        is_inside = previous_inside;
+                    } else {
+                        is_inside = !previous_inside;
+                    }
+                },
+                None => {
+                    if !is_inside {
+                        holes_x.push(hole);
+                    }
+
+                    previous_inside = is_inside;
+                    is_inside = !is_inside;
+                },
             };
-            let mut is_inside = false;
-            for j in 1..vertical_collisions.len() {
-                let i = j - 1;
-                let xa = vertical_collisions[i].x;
-                let xb = vertical_collisions[j].x;
-                let hole = HorizontalLine{ xa, xb, y };
-
-                match horizontal_line_index.as_mut() {
-                    Some(ih) => {
-                        let (horizontal_line, ends_have_same_direction) = horizontal_collisions[*ih];
-                        if hole == **horizontal_line {
-                            *ih += 1;
-                            if *ih >= horizontal_collisions.len() {
-                                horizontal_line_index = None;
-                            }
-
-                            if !ends_have_same_direction {
-                                is_inside = !is_inside;
-                            }
-                        }
-                    },
-                    None => {
-                        is_inside = !is_inside;
-
-                        if !is_inside {
-                            holes_x.push(hole);
-                        }
-                    },
-                }
-            }
+        }
 
         ris_log::trace!("{} holes: {:#?}", y, holes_x);
 
-        current_aabb_index = None;
+        //let mut holes_x = Vec::new();
+
+        //let mut horizontal_line_index = if horizontal_collisions.is_empty() {
+        //    None
+        //} else {
+        //    Some(0)
+        //};
+        //let mut is_inside = false;
+
+        //for j in 1..vertical_collisions.len() {
+        //    let i = j - 1;
+        //    let xa = vertical_collisions[i].x;
+        //    let xb = vertical_collisions[j].x;
+        //    let hole = HorizontalLine { xa, xb, y };
+
+        //    match horizontal_line_index.as_mut() {
+        //        Some(ih) => {
+        //            let (horizontal_line, ends_have_same_direction) = horizontal_collisions[*ih];
+        //            if hole == **horizontal_line {
+        //                *ih += 1;
+        //                if *ih >= horizontal_collisions.len() {
+        //                    horizontal_line_index = None;
+        //                }
+
+        //                if !ends_have_same_direction {
+        //                    is_inside = !is_inside;
+        //                }
+        //            }
+        //        }
+        //        None => {
+        //            is_inside = !is_inside;
+
+        //            if !is_inside {
+        //                holes_x.push(hole);
+        //            }
+        //        }
+        //    }
+        //}
+
+        //if y == 5 {
+        //    ris_log::trace!("vertical: {:#?}", vertical_collisions);
+        //    ris_log::trace!("horizontal: {:#?}", horizontal_collisions);
+        //    ris_log::trace!("{} holes: {:#?}", y, holes_x);
+        //}
+
+        //ris_log::trace!("{} holes: {:#?}", y, holes_x);
     }
-    
+
     // find largest rectangle
 
     Ok(42)
@@ -292,8 +343,7 @@ trait Line {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct VerticalLine
-{
+struct VerticalLine {
     x: usize,
     ya: usize,
     yb: usize,
@@ -308,31 +358,20 @@ struct HorizontalLine {
 
 impl Line for VerticalLine {
     fn collides_with(self, tile: Vec2) -> bool {
-        tile.0 == self.x &&
-            tile.1 >= self.ya &&
-            tile.1 <= self.yb
+        tile.0 == self.x && tile.1 >= self.ya && tile.1 <= self.yb
     }
 
     fn ends(self) -> [Vec2; 2] {
-        [
-            Vec2(self.x, self.ya),
-            Vec2(self.x, self.yb),
-        ]
+        [Vec2(self.x, self.ya), Vec2(self.x, self.yb)]
     }
 }
 
 impl Line for HorizontalLine {
     fn collides_with(self, tile: Vec2) -> bool {
-        tile.0 >= self.xa &&
-            tile.0 <= self.xb &&
-            tile.1 == self.y
+        tile.0 >= self.xa && tile.0 <= self.xb && tile.1 == self.y
     }
 
     fn ends(self) -> [Vec2; 2] {
-        [
-            Vec2(self.xa, self.y),
-            Vec2(self.xb, self.y),
-        ]
+        [Vec2(self.xa, self.y), Vec2(self.xb, self.y)]
     }
 }
-
