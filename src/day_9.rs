@@ -1,6 +1,5 @@
 use ris_error::prelude::*;
 
-//const PUZZLE_INPUT_KEY: &str = "day_9_custom";
 const PUZZLE_INPUT_KEY: &str = "day_9";
 
 pub fn run(answer: &mut crate::Answer) -> RisResult<()> {
@@ -52,22 +51,6 @@ fn run_part_1(tiles: &[Vec2]) -> usize {
 }
 
 fn run_part_2(tiles: &[Vec2]) -> RisResult<usize> {
-    // find biggest aabb
-    ris_log::info!("find global aabb...");
-    let mut tiles_iter = tiles.iter();
-    let t1 = *tiles_iter.next().into_ris_error()?;
-    let t2 = *tiles_iter.next().into_ris_error()?;
-    let mut global_aabb = Aabb::new(t1, t2);
-
-    for &Vec2(x, y) in tiles_iter {
-        global_aabb.min.0 = usize::min(global_aabb.min.0, x);
-        global_aabb.max.0 = usize::max(global_aabb.max.0, x);
-        global_aabb.min.1 = usize::min(global_aabb.min.1, y);
-        global_aabb.max.1 = usize::max(global_aabb.max.1, y);
-    }
-
-    ris_log::info!("global aabb: {:?}", global_aabb);
-
     // parse lines
     ris_log::info!("parse lines...");
     let mut vertical_lines = Vec::new();
@@ -117,144 +100,58 @@ fn run_part_2(tiles: &[Vec2]) -> RisResult<usize> {
         }
     }
 
-    // sort lines
-    ris_log::info!("sort lines...");
-    vertical_lines.sort_by(|lhs, rhs| lhs.x.cmp(&rhs.x));
+    // find largest rectangle
+    let mut max_area = usize::MIN;
 
-    // find holes
-    ris_log::info!("find holes...");
+    for (i, &a) in tiles.iter().enumerate() {
+        for &b in tiles.iter().skip(i + 1) {
+            let aabb = Aabb::new(a, b);
 
-    let Aabb {
-        min: Vec2(x_start, y_start),
-        max: Vec2(x_end, y_end),
-    } = global_aabb;
+            let mut intersects_with_line = false;
 
-    for y in y_start..=y_end {
-        // find all collisions
-        let mut vertical_collisions = Vec::<VerticalLine>::new();
-        let mut horizontal_collisions = Vec::new();
+            // check vertical
+            for &VerticalLine { x, ya, yb } in vertical_lines.iter() {
+                intersects_with_line = 
+                    x > aabb.min.0 &&
+                    x < aabb.max.0 &&
+                    ya < aabb.max.1 &&
+                    yb > aabb.min.1;
 
-        for x in x_start..=x_end {
-            let tile = Vec2(x, y);
-
-            for line in vertical_lines.iter() {
-                if line.collides_with(tile) {
-                    vertical_collisions.push(*line);
-                }
-            }
-        }
-
-        let mut x = x_start;
-        while x <= x_end {
-            let tile = Vec2(x, y);
-            let mut collision_found = false;
-
-            for line in horizontal_lines.iter() {
-                collision_found = line.collides_with(tile);
-                if collision_found {
-                    let width = line.xb - line.xa + 1;
-                    x += width;
-
-                    horizontal_collisions.push(line);
+                if intersects_with_line {
                     break;
                 }
             }
 
-            if !collision_found {
-                x += 1;
+            if intersects_with_line {
+                continue;
+            }
+
+            // check horizontal
+            for &HorizontalLine { xa, xb, y } in horizontal_lines.iter() {
+                intersects_with_line = 
+                    xa < aabb.max.0 &&
+                    xb > aabb.min.0 &&
+                    y > aabb.min.1 &&
+                    y < aabb.max.1;
+
+                if intersects_with_line {
+                    break;
+                }
+            }
+
+            if intersects_with_line {
+                continue;
+            }
+
+            // compute area
+            let area = aabb.area();
+            if area > max_area {
+                max_area = area;
             }
         }
-
-        // determine whether the ends of the horizontal line point in the same direction or not
-        //
-        // example of same direction:
-        //
-        //     |   |
-        //     +---+
-        //
-        // example of different direction:
-        //
-        //     |
-        //     +---+
-        //         |
-        //
-        let horizontal_collisions = horizontal_collisions
-            .iter()
-            .map(|horizontal_line| {
-                #[derive(Debug, PartialEq, Eq)]
-                enum Direction {
-                    Up,
-                    Down,
-                }
-
-                let mut end_directions = Vec::with_capacity(2);
-                for vertical_line in vertical_collisions.iter() {
-                    let [v0, v1] = vertical_line.ends();
-                    let [h0, h1] = horizontal_line.ends();
-
-                    // on construction we made sure that the a coordinate is smaller than the b
-                    // coordinate. thus, depending what tile matches, we can determine the
-                    // direction of the end
-                    if h0 == v0 {
-                        end_directions.push(Direction::Down);
-                    } else if h0 == v1 {
-                        end_directions.push(Direction::Up);
-                    } else if h1 == v0 {
-                        end_directions.push(Direction::Down);
-                    } else if h1 == v1 {
-                        end_directions.push(Direction::Up);
-                    }
-
-                    if end_directions.len() == 2 {
-                        break;
-                    }
-                }
-
-                let ends_have_same_direction = end_directions[0] == end_directions[1];
-                (horizontal_line, ends_have_same_direction)
-            })
-            .collect::<Vec<_>>();
-
-        // find holes
-        let mut holes_x = Vec::new();
-
-        let mut previous_inside = false;
-        let mut is_inside = true;
-
-        for j in 1..vertical_collisions.len() {
-            let i = j - 1;
-            let xa = vertical_collisions[i].x;
-            let xb = vertical_collisions[j].x;
-            let hole = HorizontalLine { xa, xb, y };
-
-            let horizontal_collision = horizontal_collisions.iter()
-                .find(|&&(&&horizontal_line, _)| horizontal_line == hole);
-
-            match horizontal_collision {
-                Some((_, ends_have_same_direction)) => {
-                    if *ends_have_same_direction {
-                        is_inside = previous_inside;
-                    } else {
-                        is_inside = !previous_inside;
-                    }
-                },
-                None => {
-                    if !is_inside {
-                        holes_x.push(hole);
-                    }
-
-                    previous_inside = is_inside;
-                    is_inside = !is_inside;
-                },
-            };
-        }
-
-        ris_log::trace!("{} holes: {:#?}", y, holes_x);
     }
 
-    // find largest rectangle
-
-    Ok(42)
+    Ok(max_area)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
