@@ -129,7 +129,7 @@ fn run_part_2(machines: &[Machine]) -> RisResult<usize> {
 
     std::thread::scope(|s| {
         let sum = Arc::new(AtomicUsize::new(0));
-        let num_threads = 1;
+        let num_threads = 12;
         let progress = Arc::new(AtomicUsize::new(0));
 
         for i in 0..num_threads {
