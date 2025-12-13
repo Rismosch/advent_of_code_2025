@@ -129,7 +129,7 @@ fn run_part_2(machines: &[Machine]) -> RisResult<usize> {
 
     std::thread::scope(|s| {
         let sum = Arc::new(AtomicUsize::new(0));
-        let num_threads = 12;
+        let num_threads = 1;
         let progress = Arc::new(AtomicUsize::new(0));
 
         for i in 0..num_threads {
@@ -191,57 +191,79 @@ fn press_button_2(button: &Button, joltages: &Joltages) -> Option<Joltages> {
 }
 
 fn configure_machine(machine: &Machine) -> usize {
-    let mut visited_nodes = std::collections::HashSet::<Joltages>::new();
-    let mut to_visit = std::collections::VecDeque::new();
-
-    let mut buttons = machine.buttons.clone();
     let mut joltage = machine.joltages.clone();
+    let mut buttons = machine.buttons.clone();
 
-    // decrease joltage by buttons, that are the only ones of changing a specific index. since
-    // these buttons are the only one that can affect a specific index, they must be pressed
-    // exactly as often as the joltage at the index. doing this upfront means we don't need to
-    // search later, thus increasing performance.
+    // remove unnecessary buttons
     let mut generation = 0;
 
     loop {
-        break;
-        let mut button_index_map = Vec::with_capacity(joltage.len());
-        for _ in 0..button_index_map.capacity() {
-            button_index_map.push(Vec::new());
-        }
 
-        for button in buttons.clone().into_iter().enumerate() {
-            for index in button.1.iter() {
-                button_index_map[*index].push(button.clone())
+        let mut single_button_found = false;
+        
+        let mut button_map = std::collections::HashMap::<usize, Vec<Button>>::new();
+        for button in buttons.iter() {
+            for index in button.iter() {
+                match button_map.get_mut(index) {
+                    Some(buttons) => buttons.push(button.clone()),
+                    None => _ = button_map.insert(*index, vec![button.clone()])
+                }
             }
         }
 
-        let mut buttons_to_remove = std::collections::HashSet::new();
-        for entry in button_index_map.iter() {
+        for (_index, entry) in button_map.iter() {
             if entry.len() != 1 {
                 continue;
             }
 
-            let (i, button) = &entry[0];
-            joltage = press_button_2(&button, &joltage).expect("operation to be valid");
-            buttons_to_remove.insert(i);
-            generation += 1;
+            // this is the only button that affects _index, thus it MUST be pressed as often as the
+            // joltage at that index. we can then remove the button and thus reduce the searchspace
+            // later
+            single_button_found = true;
+
+            let button = &entry[0];
+            loop {
+                let Some(new_joltage) = press_button_2(button, &joltage) else {
+                    break;
+                };
+
+                joltage = new_joltage;
+                generation += 1;
+            }
+
+            remove_button(&mut buttons, button);
         }
 
-        if buttons_to_remove.is_empty() {
-            // no buttons exist anymore that affect only one index
+        // find buttons that affect all indices. pressing these gives the maximum progress, since they
+        // affect everything
+        let all_button_exists = false;
+        //let all_button = joltage.iter()
+        //    .enumerate()
+        //    .filter(|(_, x)| **x > 0)
+        //    .map(|(i, _)| i)
+        //    .collect::<Vec<_>>();
+
+        //let all_button_exists = remove_button(&mut buttons, &all_button);
+        //if all_button_exists {
+        //    loop {
+        //        let Some(new_joltage) = press_button_2(&all_button, &joltage) else {
+        //            break;
+        //        };
+
+        //        joltage = new_joltage;
+        //        generation += 1;
+        //    }
+        //}
+
+        let buttons_where_removed = single_button_found || all_button_exists;
+        if !buttons_where_removed {
+            // reached the worst case, we can now go to the next step
             break;
         }
-
-        let mut buttons_to_remove = buttons_to_remove.iter().collect::<Vec<_>>();
-        buttons_to_remove.sort();
-        println!("remove {:?} buttons: {:?}", buttons_to_remove, buttons);
-        for &&index in buttons_to_remove.iter().rev() {
-            buttons.swap_remove(*index);
-        }
-
     }
 
+    let mut visited_nodes = std::collections::HashSet::<Joltages>::new();
+    let mut to_visit = std::collections::VecDeque::new();
     to_visit.push_back((joltage, generation));
 
     let mut shortest_path = None;
@@ -276,3 +298,30 @@ fn configure_machine(machine: &Machine) -> usize {
     shortest_path.expect("a path to be found")
 }
 
+fn remove_button(buttons: &mut Vec<Button>, button: &Button) -> bool {
+    // now remove the button
+    let button_index = buttons.iter().position(|candidate| {
+        if candidate.len() != button.len() {
+            return false;
+        }
+
+        for i in 0..candidate.len() {
+            let l = candidate[i];
+            let r = button[i];
+            if l != r {
+                return false;
+            }
+        }
+
+        return true;
+    });
+
+    // button_index is None if it was already removed. this may happen if the same button
+    // is the only one that affects multiple indices
+    if let Some(button_index) = button_index {
+        buttons.swap_remove(button_index);
+        true
+    } else {
+        false
+    }
+}
